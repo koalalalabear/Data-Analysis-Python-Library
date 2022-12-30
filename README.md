@@ -3,7 +3,7 @@ A repository of functions and codes I wrote and intend to re-use in data preproc
 
 The stages of data preprocessing covered includes: 
 1. File Processing
-2. Data Frame Formatting
+2. Dataframe Formatting
 3. EDA
 4. Data wranggling & transformations for machine learning 
 5. Data Analysis & Visualizations
