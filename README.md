@@ -1,5 +1,5 @@
 # Data Analysis Python Library
-A repository of functions and codes I wrote and intend to re-use in data preprocessing for data science projects that handle big data. 
+A repository of user defined functions I wrote (and some other codes I use frequently) for data preprocessing in data science projects that handle big data. 
 
 The stages of data preprocessing covered includes: 
 1. File Processing
