@@ -1,0 +1,126 @@
+
+
+"""
+Directory Tree Generator
+-----------------------
+A script that visualizes the file structure of the current directory or a specified path.
+"""
+
+import os
+import argparse
+from pathlib import Path
+
+
+def print_directory_tree(root_dir, prefix="", exclude_dirs=None, max_depth=None, current_depth=0):
+    """
+    Print a directory tree structure starting from root_dir.
+    
+    Args:
+        root_dir (str): The directory to start printing from
+        prefix (str): Prefix string for the current item (used for recursion)
+        exclude_dirs (list): List of directory names to exclude
+        max_depth (int, optional): Maximum depth to traverse
+        current_depth (int): Current depth of recursion
+    """
+    if exclude_dirs is None:
+        exclude_dirs = []
+    
+    # Check if we've reached the maximum depth
+    if max_depth is not None and current_depth > max_depth:
+        return
+    
+    # Get the directory contents, sorted alphabetically
+    root_path = Path(root_dir)
+    contents = sorted(list(root_path.iterdir()), key=lambda x: (x.is_file(), x.name.lower()))
+    
+    # Count total items to process (excluding hidden files and excluded dirs)
+    count = sum(1 for item in contents if not item.name.startswith('.') and 
+               (item.is_file() or item.name not in exclude_dirs))
+    
+    item_index = 0
+    
+    for item in contents:
+        # Skip hidden files and directories if user wants
+        if item.name.startswith('.'):
+            continue
+        
+        # Skip excluded directories
+        if item.is_dir() and item.name in exclude_dirs:
+            continue
+        
+        item_index += 1
+        is_last_item = item_index == count
+        
+        # Choose the appropriate branch symbols
+        if is_last_item:
+            branch = "└── "
+            new_prefix = prefix + "    "
+        else:
+            branch = "├── "
+            new_prefix = prefix + "│   "
+        
+        # Print the current item
+        print(f"{prefix}{branch}{item.name}")
+        
+        # Recursively print subdirectories
+        if item.is_dir():
+            print_directory_tree(
+                item, 
+                new_prefix, 
+                exclude_dirs, 
+                max_depth, 
+                current_depth + 1
+            )
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Print the directory tree structure.")
+    parser.add_argument(
+        "path", 
+        nargs="?", 
+        default=".", 
+        help="The directory path to display (default: current directory)"
+    )
+    parser.add_argument(
+        "-d", "--max-depth", 
+        type=int, 
+        help="Maximum depth of the directory tree to display"
+    )
+    parser.add_argument(
+        "-e", "--exclude", 
+        nargs="+", 
+        default=["__pycache__", "node_modules", ".git", ".venv", "venv"], 
+        help="Directories to exclude (default: __pycache__, node_modules, .git, .venv, venv)"
+    )
+    parser.add_argument(
+        "--show-hidden", 
+        action="store_true", 
+        help="Show hidden files and directories (starting with .)"
+    )
+
+    args = parser.parse_args()
+    
+    path = os.path.abspath(args.path)
+    
+    if not os.path.exists(path):
+        print(f"Error: The path '{path}' does not exist.")
+        return
+    
+    if not os.path.isdir(path):
+        print(f"Error: '{path}' is not a directory.")
+        return
+    
+    print(f"\nDirectory Tree for: {path}\n")
+    directory_name = os.path.basename(path) or path
+    print(directory_name)
+    
+    print_directory_tree(
+        path, 
+        prefix="", 
+        exclude_dirs=args.exclude if not args.show_hidden else [], 
+        max_depth=args.max_depth
+    )
+
+
+if __name__ == "__main__":
+    main()
